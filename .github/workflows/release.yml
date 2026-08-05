@@ -1,4 +1,4 @@
-# 文件说明：墨记 GitHub Release 自动发布流程，按版本标签构建并上传 macOS 通用安装包。
+# 文件说明：墨记 GitHub Release 自动发布流程，按版本标签构建并上传三种 macOS 架构安装包。
 # 作者：dingyi60(Codex)
 # 创建时间：2026-08-05
 
@@ -105,8 +105,11 @@ jobs:
           "$TEST_EXECUTABLE" \
             "$GITHUB_WORKSPACE/Examples/墨记完整功能演示.md"
 
-      - name: Build release DMG
-        run: ./package.sh
+      - name: Build release DMGs
+        run: |
+          ./package.sh universal
+          ./package.sh arm64
+          ./package.sh x86_64
 
       - name: Prepare release assets
         id: assets
@@ -115,31 +118,28 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
-          SOURCE_DMG="$(find outputs -maxdepth 1 -type f -name "墨记-${VERSION}-*.dmg" -print -quit)"
-          if [[ -z "$SOURCE_DMG" ]]; then
-            echo "没有找到版本 ${VERSION} 的 DMG 产物。" >&2
-            exit 1
-          fi
+          for ARCHITECTURE in universal arm64 x86_64; do
+            SOURCE_DMG="$(find outputs -maxdepth 1 -type f -name "墨记-${VERSION}-${ARCHITECTURE}-*.dmg" -print -quit)"
+            if [[ -z "$SOURCE_DMG" ]]; then
+              echo "没有找到版本 ${VERSION}、架构 ${ARCHITECTURE} 的 DMG 产物。" >&2
+              exit 1
+            fi
 
-          # GitHub Release 会清理附件文件名中的非 ASCII 字符，使用英文品牌名可避免中文前缀被移除。
-          RELEASE_DMG="outputs/InkMark-${VERSION}-macOS-universal.dmg"
-          CHECKSUM_FILE="${RELEASE_DMG}.sha256"
-          mv "$SOURCE_DMG" "$RELEASE_DMG"
-          (
-            cd outputs
-            shasum -a 256 "$(basename "$RELEASE_DMG")" > "$(basename "$CHECKSUM_FILE")"
-          )
-
-          echo "dmg=$RELEASE_DMG" >> "$GITHUB_OUTPUT"
-          echo "checksum=$CHECKSUM_FILE" >> "$GITHUB_OUTPUT"
+            # GitHub Release 会清理附件文件名中的非 ASCII 字符，使用英文品牌名可避免中文前缀被移除。
+            RELEASE_DMG="outputs/InkMark-${VERSION}-macOS-${ARCHITECTURE}.dmg"
+            CHECKSUM_FILE="${RELEASE_DMG}.sha256"
+            mv "$SOURCE_DMG" "$RELEASE_DMG"
+            (
+              cd outputs
+              shasum -a 256 "$(basename "$RELEASE_DMG")" > "$(basename "$CHECKSUM_FILE")"
+            )
+          done
 
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
         with:
           name: 墨记-${{ steps.version.outputs.version }}-macOS
-          path: |
-            ${{ steps.assets.outputs.dmg }}
-            ${{ steps.assets.outputs.checksum }}
+          path: outputs/InkMark-${{ steps.version.outputs.version }}-macOS-*.dmg*
           if-no-files-found: error
           retention-days: 14
 
@@ -147,20 +147,25 @@ jobs:
         shell: bash
         env:
           VERSION: ${{ steps.version.outputs.version }}
-          DMG_PATH: ${{ steps.assets.outputs.dmg }}
-          CHECKSUM_PATH: ${{ steps.assets.outputs.checksum }}
         run: |
           set -euo pipefail
+          RELEASE_ASSETS=(
+            outputs/InkMark-"${VERSION}"-macOS-*.dmg
+            outputs/InkMark-"${VERSION}"-macOS-*.dmg.sha256
+          )
+          if [[ "${#RELEASE_ASSETS[@]}" -ne 6 ]]; then
+            echo "发布产物数量异常，期望 6 个，实际 ${#RELEASE_ASSETS[@]} 个。" >&2
+            exit 1
+          fi
+
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" \
-              "$DMG_PATH" \
-              "$CHECKSUM_PATH" \
+              "${RELEASE_ASSETS[@]}" \
               --clobber \
               --repo "$GITHUB_REPOSITORY"
           else
             gh release create "$RELEASE_TAG" \
-              "$DMG_PATH" \
-              "$CHECKSUM_PATH" \
+              "${RELEASE_ASSETS[@]}" \
               --title "墨记 ${VERSION}" \
               --generate-notes \
               --target "$GITHUB_SHA" \
