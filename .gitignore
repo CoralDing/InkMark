@@ -1,0 +1,26 @@
+# 文件说明：墨记 Git 忽略规则，仅排除本机构建、用户状态和发布产物。
+# 作者：Codex
+# 创建时间：2026-07-29
+
+.DS_Store
+.Trashes
+*.swp
+
+# Xcode 本地状态与构建目录
+DerivedData/
+build/
+Build/
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+
+# Swift Package Manager 本地缓存
+.build/
+.swiftpm/
+
+# 本地发布产物
+outputs/
+*.dmg
+*.zip
+

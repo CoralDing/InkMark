@@ -1,0 +1,45 @@
+# 文件说明：墨记 GitHub Actions 自动构建检查。
+# 作者：Codex
+# 创建时间：2026-07-29
+
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate project files
+        run: |
+          plutil -lint InkMark/InkMark-Info.plist InkMark.xcodeproj/project.pbxproj
+          xmllint --noout InkMark.xcodeproj/xcshareddata/xcschemes/InkMark.xcscheme
+
+      - name: Test Markdown renderer
+        run: |
+          xcrun swiftc \
+            InkMark/Sources/Core/Markdown/ModernMarkdownRenderer.swift \
+            Tests/RendererSmokeTests/main.swift \
+            -o /tmp/moji-renderer-tests
+          /tmp/moji-renderer-tests
+
+      - name: Build Debug app
+        run: |
+          xcodebuild \
+            -project InkMark.xcodeproj \
+            -scheme InkMark \
+            -configuration Debug \
+            -destination 'generic/platform=macOS' \
+            -derivedDataPath DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build

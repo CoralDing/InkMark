@@ -1,0 +1,16 @@
+Eclipse Temurin 17.0.20+8
+
+Project: https://adoptium.net/temurin/
+Source: https://github.com/adoptium/temurin-build
+License: GNU General Public License, version 2, with the Classpath Exception
+SPDX-License-Identifier: GPL-2.0 WITH Classpath-exception-2.0
+
+墨记分发的两套 JRE 均保留了 Eclipse Temurin 原始 NOTICE、完整模块许可证、
+附加许可信息和 OpenJDK Assembly Exception。完整文本位于应用资源目录：
+
+PlantUML/runtime-arm64/Contents/Home/NOTICE
+PlantUML/runtime-arm64/Contents/Home/legal/
+PlantUML/runtime-x86_64/Contents/Home/NOTICE
+PlantUML/runtime-x86_64/Contents/Home/legal/
+
+两个架构目录中的许可内容来自同一 Temurin 17.0.20+8 发行版本。

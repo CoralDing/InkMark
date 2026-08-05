@@ -1,0 +1,492 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0A1B2C3D4E5F60718293A4B5 /* MojiPlantUMLRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708192A3B4C5 /* MojiPlantUMLRenderer.swift */; };
+		0A1B2C3D4E5F60718293A4B6 /* PlantUML in Resources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708192A3B4C6 /* PlantUML */; };
+		219F97214986ECB62227B8B6 /* MojiPluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDCDC1F503642BAD5845D220 /* MojiPluginManager.swift */; };
+		24D8C7A4B3694F69A1D827A1 /* MojiPreferencesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E2A83B41BE44BFA8FBC0E23 /* MojiPreferencesWindowController.swift */; };
+		520C3DB89E8FFD7EAC597B09 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 201FE1C0AFEF29F60A51A589 /* Cocoa.framework */; };
+		6D3EAA71102A49D48F8C2141 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2E31F4F52F141158B50EAA5 /* main.swift */; };
+		8A9F5E2704E13EA2491549F0 /* ModernMarkdownDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B3E5B7E587218ECE4CA7F9 /* ModernMarkdownDocument.swift */; };
+		9169B5ED6373618063771839 /* MojiPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = B014E996945BDAD9B785EDF2 /* MojiPreferences.swift */; };
+		992DCD8FBD7BB277480597CF /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A963AE44002514A1FAA099CC /* WebKit.framework */; };
+		AD7575097045FE3764031FDF /* MarkdownDocument.icns in Resources */ = {isa = PBXBuildFile; fileRef = B415D72B55288209ACE3B345 /* MarkdownDocument.icns */; };
+		B487B46A0F72BC5417F004A9 /* ModernPreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DE436E0AE1D1686867F00B8 /* ModernPreviewViewController.swift */; };
+		C5A656F841F9785612578886 /* ModernEditorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B32851EE976E5CDF6AA793D6 /* ModernEditorViewController.swift */; };
+		E0CAA77757F4159E44BE5539 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4B82BF81BCF4465BCC180BC2 /* Images.xcassets */; };
+		E1A2B3C4D5E6F708192A3B4C /* mermaid.min.js in Resources */ = {isa = PBXBuildFile; fileRef = F1A2B3C4D5E6F708192A3B4C /* mermaid.min.js */; };
+		A1B2C3D4E5F60718293A4B01 /* katex.min.js in Resources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5061728394A5B01 /* katex.min.js */; };
+		A1B2C3D4E5F60718293A4B02 /* katex-auto-render.min.js in Resources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5061728394A5B02 /* katex-auto-render.min.js */; };
+		A1B2C3D4E5F60718293A4B03 /* katex.min.css in Resources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5061728394A5B03 /* katex.min.css */; };
+		E676E0D1C30528BD0A088F79 /* ModernMarkdownRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75A688DE7A0977AB51CDE43C /* ModernMarkdownRenderer.swift */; };
+		FCA6B605B18A4194955C51B1 /* MojiAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACEE3E38D50EA86EECE87238 /* MojiAppDelegate.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1A2B3C4D5E6F708192A3B4C5 /* MojiPlantUMLRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MojiPlantUMLRenderer.swift; path = InkMark/Sources/Core/Diagram/MojiPlantUMLRenderer.swift; sourceTree = SOURCE_ROOT; };
+		1A2B3C4D5E6F708192A3B4C6 /* PlantUML */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder; name = PlantUML; path = InkMark/Resources/PlantUML; sourceTree = SOURCE_ROOT; };
+		201FE1C0AFEF29F60A51A589 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		443152CF423236D26AC82124 /* 墨记.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "墨记.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4B82BF81BCF4465BCC180BC2 /* Images.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = InkMark/Images.xcassets; sourceTree = SOURCE_ROOT; };
+		75A688DE7A0977AB51CDE43C /* ModernMarkdownRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ModernMarkdownRenderer.swift; path = InkMark/Sources/Core/Markdown/ModernMarkdownRenderer.swift; sourceTree = SOURCE_ROOT; };
+		7E2A83B41BE44BFA8FBC0E23 /* MojiPreferencesWindowController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MojiPreferencesWindowController.swift; path = InkMark/Sources/Core/Preferences/MojiPreferencesWindowController.swift; sourceTree = SOURCE_ROOT; };
+		8DE436E0AE1D1686867F00B8 /* ModernPreviewViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ModernPreviewViewController.swift; path = InkMark/Sources/Features/Preview/Modern/ModernPreviewViewController.swift; sourceTree = SOURCE_ROOT; };
+		A963AE44002514A1FAA099CC /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		ACEE3E38D50EA86EECE87238 /* MojiAppDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MojiAppDelegate.swift; path = InkMark/Sources/App/Modern/MojiAppDelegate.swift; sourceTree = SOURCE_ROOT; };
+		B014E996945BDAD9B785EDF2 /* MojiPreferences.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MojiPreferences.swift; path = InkMark/Sources/Core/Preferences/MojiPreferences.swift; sourceTree = SOURCE_ROOT; };
+		B32851EE976E5CDF6AA793D6 /* ModernEditorViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ModernEditorViewController.swift; path = InkMark/Sources/Features/Editor/Modern/ModernEditorViewController.swift; sourceTree = SOURCE_ROOT; };
+		B415D72B55288209ACE3B345 /* MarkdownDocument.icns */ = {isa = PBXFileReference; includeInIndex = 1; name = MarkdownDocument.icns; path = InkMark/Resources/MarkdownDocument.icns; sourceTree = SOURCE_ROOT; };
+		C2B3E5B7E587218ECE4CA7F9 /* ModernMarkdownDocument.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ModernMarkdownDocument.swift; path = InkMark/Sources/App/Modern/ModernMarkdownDocument.swift; sourceTree = SOURCE_ROOT; };
+		CDCDC1F503642BAD5845D220 /* MojiPluginManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MojiPluginManager.swift; path = InkMark/Sources/Core/Plugins/MojiPluginManager.swift; sourceTree = SOURCE_ROOT; };
+		D2E31F4F52F141158B50EAA5 /* main.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = main.swift; path = InkMark/Sources/App/Modern/main.swift; sourceTree = SOURCE_ROOT; };
+		F1A2B3C4D5E6F708192A3B4C /* mermaid.min.js */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.javascript; name = mermaid.min.js; path = InkMark/Resources/mermaid.min.js; sourceTree = SOURCE_ROOT; };
+		B1C2D3E4F5061728394A5B01 /* katex.min.js */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.javascript; name = katex.min.js; path = InkMark/Resources/katex.min.js; sourceTree = SOURCE_ROOT; };
+		B1C2D3E4F5061728394A5B02 /* katex-auto-render.min.js */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.javascript; name = katex-auto-render.min.js; path = InkMark/Resources/katex-auto-render.min.js; sourceTree = SOURCE_ROOT; };
+		B1C2D3E4F5061728394A5B03 /* katex.min.css */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.css; name = katex.min.css; path = InkMark/Resources/katex.min.css; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EB8BAA1763864F81D1BE4B18 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				520C3DB89E8FFD7EAC597B09 /* Cocoa.framework in Frameworks */,
+				992DCD8FBD7BB277480597CF /* WebKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1086716741ABD067F25DFA97 /* Editor */ = {
+			isa = PBXGroup;
+			children = (
+				11B9447CC51BF7AA4455C539 /* Modern */,
+			);
+			name = Editor;
+			sourceTree = "<group>";
+		};
+		11B9447CC51BF7AA4455C539 /* Modern */ = {
+			isa = PBXGroup;
+			children = (
+				B32851EE976E5CDF6AA793D6 /* ModernEditorViewController.swift */,
+			);
+			name = Modern;
+			sourceTree = "<group>";
+		};
+		12F179689EBF6827D0E3B14E /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B415D72B55288209ACE3B345 /* MarkdownDocument.icns */,
+				1A2B3C4D5E6F708192A3B4C6 /* PlantUML */,
+				F1A2B3C4D5E6F708192A3B4C /* mermaid.min.js */,
+				B1C2D3E4F5061728394A5B01 /* katex.min.js */,
+				B1C2D3E4F5061728394A5B02 /* katex-auto-render.min.js */,
+				B1C2D3E4F5061728394A5B03 /* katex.min.css */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		31946EED2F771A15B6463E49 /* Modern */ = {
+			isa = PBXGroup;
+			children = (
+				D2E31F4F52F141158B50EAA5 /* main.swift */,
+				ACEE3E38D50EA86EECE87238 /* MojiAppDelegate.swift */,
+				C2B3E5B7E587218ECE4CA7F9 /* ModernMarkdownDocument.swift */,
+			);
+			name = Modern;
+			sourceTree = "<group>";
+		};
+		464399E40E693BE5BFC6004D /* Plugins */ = {
+			isa = PBXGroup;
+			children = (
+				CDCDC1F503642BAD5845D220 /* MojiPluginManager.swift */,
+			);
+			name = Plugins;
+			sourceTree = "<group>";
+		};
+		4F98E0B4A634644FA7BB698B /* Modern */ = {
+			isa = PBXGroup;
+			children = (
+				8DE436E0AE1D1686867F00B8 /* ModernPreviewViewController.swift */,
+			);
+			name = Modern;
+			sourceTree = "<group>";
+		};
+		631E47412FECC32C8625B6F1 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				1086716741ABD067F25DFA97 /* Editor */,
+				BAE7FB600E9D3C7360AC7249 /* Preview */,
+			);
+			name = Features;
+			sourceTree = "<group>";
+		};
+		7D6DE2017984CFFDB6A73B1A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				443152CF423236D26AC82124 /* 墨记.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		81FB85EC906BB4369CBA05FF /* InkMark */ = {
+			isa = PBXGroup;
+			children = (
+				E6A9B3D3E1ADF85E244EBC31 /* Sources */,
+				12F179689EBF6827D0E3B14E /* Resources */,
+				4B82BF81BCF4465BCC180BC2 /* Images.xcassets */,
+			);
+			name = InkMark;
+			path = InkMark;
+			sourceTree = "<group>";
+		};
+		83F93B4B33C97BD0376BC260 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				2A3B4C5D6E7F8091A2B3C4D5 /* Diagram */,
+				D3B3AF67AF6E5AF6633FBD56 /* Markdown */,
+				AC3EC8040F5D88DBBD3FC854 /* Preferences */,
+				464399E40E693BE5BFC6004D /* Plugins */,
+			);
+			name = Core;
+			sourceTree = "<group>";
+		};
+		2A3B4C5D6E7F8091A2B3C4D5 /* Diagram */ = {
+			isa = PBXGroup;
+			children = (
+				1A2B3C4D5E6F708192A3B4C5 /* MojiPlantUMLRenderer.swift */,
+			);
+			name = Diagram;
+			sourceTree = "<group>";
+		};
+		AC3EC8040F5D88DBBD3FC854 /* Preferences */ = {
+			isa = PBXGroup;
+			children = (
+				B014E996945BDAD9B785EDF2 /* MojiPreferences.swift */,
+				7E2A83B41BE44BFA8FBC0E23 /* MojiPreferencesWindowController.swift */,
+			);
+			name = Preferences;
+			sourceTree = "<group>";
+		};
+		B6C0257C74D3D111691C6248 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				201FE1C0AFEF29F60A51A589 /* Cocoa.framework */,
+				A963AE44002514A1FAA099CC /* WebKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		BAE7FB600E9D3C7360AC7249 /* Preview */ = {
+			isa = PBXGroup;
+			children = (
+				4F98E0B4A634644FA7BB698B /* Modern */,
+			);
+			name = Preview;
+			sourceTree = "<group>";
+		};
+		CA7EABA2367CE7DBE2F629C1 = {
+			isa = PBXGroup;
+			children = (
+				7D6DE2017984CFFDB6A73B1A /* Products */,
+				B6C0257C74D3D111691C6248 /* Frameworks */,
+				81FB85EC906BB4369CBA05FF /* InkMark */,
+			);
+			sourceTree = "<group>";
+		};
+		D3B3AF67AF6E5AF6633FBD56 /* Markdown */ = {
+			isa = PBXGroup;
+			children = (
+				75A688DE7A0977AB51CDE43C /* ModernMarkdownRenderer.swift */,
+			);
+			name = Markdown;
+			sourceTree = "<group>";
+		};
+		E6A9B3D3E1ADF85E244EBC31 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				F086686F05FDD03454FD2CA3 /* App */,
+				83F93B4B33C97BD0376BC260 /* Core */,
+				631E47412FECC32C8625B6F1 /* Features */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		F086686F05FDD03454FD2CA3 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				31946EED2F771A15B6463E49 /* Modern */,
+			);
+			name = App;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		696DC815F67A15F16438C54C /* InkMark */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9072DF3F161CE89F43CD4715 /* Build configuration list for PBXNativeTarget "InkMark" */;
+			buildPhases = (
+				6368FDAD8E61D2A068A1EDE2 /* Sources */,
+				EB8BAA1763864F81D1BE4B18 /* Frameworks */,
+				28A5DA7521510D567D8B8FC4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = InkMark;
+			productName = "墨记";
+		productReference = 443152CF423236D26AC82124 /* 墨记.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		ABF38CE87E3D1C7B18A36605 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				ORGANIZATIONNAME = Moji;
+			};
+			buildConfigurationList = A82544E3FEF79E1A3A83561E /* Build configuration list for PBXProject "InkMark" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = "zh-Hans";
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				"zh-Hans",
+				Base,
+			);
+			mainGroup = CA7EABA2367CE7DBE2F629C1;
+			minimizedProjectReferenceProxies = 0;
+			productRefGroup = 7D6DE2017984CFFDB6A73B1A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				696DC815F67A15F16438C54C /* InkMark */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		28A5DA7521510D567D8B8FC4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0A1B2C3D4E5F60718293A4B6 /* PlantUML in Resources */,
+				AD7575097045FE3764031FDF /* MarkdownDocument.icns in Resources */,
+				E0CAA77757F4159E44BE5539 /* Images.xcassets in Resources */,
+				E1A2B3C4D5E6F708192A3B4C /* mermaid.min.js in Resources */,
+				A1B2C3D4E5F60718293A4B01 /* katex.min.js in Resources */,
+				A1B2C3D4E5F60718293A4B02 /* katex-auto-render.min.js in Resources */,
+				A1B2C3D4E5F60718293A4B03 /* katex.min.css in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6368FDAD8E61D2A068A1EDE2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0A1B2C3D4E5F60718293A4B5 /* MojiPlantUMLRenderer.swift in Sources */,
+				6D3EAA71102A49D48F8C2141 /* main.swift in Sources */,
+				FCA6B605B18A4194955C51B1 /* MojiAppDelegate.swift in Sources */,
+				8A9F5E2704E13EA2491549F0 /* ModernMarkdownDocument.swift in Sources */,
+				E676E0D1C30528BD0A088F79 /* ModernMarkdownRenderer.swift in Sources */,
+				C5A656F841F9785612578886 /* ModernEditorViewController.swift in Sources */,
+				B487B46A0F72BC5417F004A9 /* ModernPreviewViewController.swift in Sources */,
+				9169B5ED6373618063771839 /* MojiPreferences.swift in Sources */,
+				24D8C7A4B3694F69A1D827A1 /* MojiPreferencesWindowController.swift in Sources */,
+				219F97214986ECB62227B8B6 /* MojiPluginManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0FE8A76FFDEC2528B2E4271F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		6BAB44D5B06A4A8314A7714B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "InkMark/InkMark-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LM_FILTER_WARNINGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.dingyi60.moji;
+				PRODUCT_MODULE_NAME = Moji;
+				PRODUCT_NAME = "墨记";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		767B2C84013587FCB0630B9C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "InkMark/InkMark-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LM_FILTER_WARNINGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "io.github.dingyi60.moji.debug";
+				PRODUCT_MODULE_NAME = Moji;
+				PRODUCT_NAME = "墨记Debug";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		96FB88F4E4F70359B5FAEC46 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9072DF3F161CE89F43CD4715 /* Build configuration list for PBXNativeTarget "InkMark" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6BAB44D5B06A4A8314A7714B /* Release */,
+				767B2C84013587FCB0630B9C /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A82544E3FEF79E1A3A83561E /* Build configuration list for PBXProject "InkMark" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0FE8A76FFDEC2528B2E4271F /* Debug */,
+				96FB88F4E4F70359B5FAEC46 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = ABF38CE87E3D1C7B18A36605 /* Project object */;
+}
