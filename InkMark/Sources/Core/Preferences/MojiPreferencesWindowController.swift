@@ -72,7 +72,7 @@ final class MojiPreferencesWindowController: NSWindowController, NSTableViewData
 
     private enum Layout {
         static let windowSize = NSSize(width: 800, height: 600)
-        static let minWindowSize = NSSize(width: 760, height: 540)
+        static let minimumWindowWidth: CGFloat = 760
         static let sidebarWidth: CGFloat = 196
         static let contentWidth: CGFloat = 520
         static let textColumnWidth: CGFloat = 320
@@ -102,13 +102,17 @@ final class MojiPreferencesWindowController: NSWindowController, NSTableViewData
         window.title = "设置"
         window.titleVisibility = .visible
         window.titlebarAppearsTransparent = false
-        window.minSize = Layout.minWindowSize
+        // 设置窗口只允许横向调整，固定内容区高度可避免不同分类之间产生窗口跳动。
+        window.contentMinSize = NSSize(width: Layout.minimumWindowWidth, height: Layout.windowSize.height)
+        window.contentMaxSize = NSSize(width: .greatestFiniteMagnitude, height: Layout.windowSize.height)
         window.contentViewController = contentController
         contentController.preferredContentSize = Layout.windowSize
         window.setContentSize(Layout.windowSize)
-        // 设置窗口使用固定标识保存尺寸和位置，避免用户每次打开都要重新调整窗口。
-        // 首次启动没有历史位置时居中，之后尊重用户上一次关闭窗口时的布局。
-        if !window.setFrameAutosaveName("Moji.PreferencesWindow") {
+        // 自动保存只沿用窗口位置和宽度；旧版本保存过的其他高度会在恢复后统一校正为 600。
+        let restoredSavedFrame = window.setFrameAutosaveName("Moji.PreferencesWindow")
+        let restoredContentWidth = max(window.contentLayoutRect.width, Layout.minimumWindowWidth)
+        window.setContentSize(NSSize(width: restoredContentWidth, height: Layout.windowSize.height))
+        if !restoredSavedFrame {
             window.center()
         }
         window.isReleasedWhenClosed = false
