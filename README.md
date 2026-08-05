@@ -138,6 +138,27 @@ xcrun swiftc \
 
 脚本会依次执行 Release（发布版）构建、本地临时签名、签名校验和 DMG 校验。产物保存在 `outputs/`，命令末尾会输出 SHA-256（文件完整性摘要）。
 
+## 自动发布
+
+仓库包含 [Release 工作流](.github/workflows/release.yml)。推送符合 `v主版本.次版本.修订版本` 格式的 Git 标签后，GitHub Actions（GitHub 自动化流水线）会自动：
+
+1. 校验标签版本与 `InkMark-Info.plist` 一致。
+2. 运行 Markdown 冒烟测试和真实预览运行时测试。
+3. 构建同时支持 Apple Silicon 与 Intel 的 Release 应用。
+4. 生成并校验 DMG 安装包及 SHA-256 文件。
+5. 创建或更新对应 GitHub Release，并附加两个产物。
+
+发布 `1.0.0` 的命令：
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+也可以进入 GitHub 仓库的“Actions → Release → Run workflow”，输入 `v1.0.0` 手动发布。重复运行同一标签会覆盖 Release 中的同名产物。
+
+当前自动发布包使用本地临时签名，尚未接入 Apple Developer ID（苹果开发者分发签名）与公证。首次打开下载的应用时，可能需要在访达中右键选择“打开”。
+
 ## 项目结构
 
 ```text
