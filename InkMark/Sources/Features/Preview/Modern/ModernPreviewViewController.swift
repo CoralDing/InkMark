@@ -397,7 +397,12 @@ final class ModernPreviewViewController: NSViewController, WKNavigationDelegate,
         isApplyingNativeScroll = true;
         window.clearTimeout(synchronizedScrollTimer);
         lastRequestedScrollY = Math.min(maximumScrollY(), Math.max(0, targetY));
+        // 目录插件会为页面启用平滑滚动；同步定位必须临时关闭动画，否则连续校正会读取到动画中间位置。
+        const rootElement = document.documentElement;
+        const previousInlineScrollBehavior = rootElement.style.scrollBehavior;
+        rootElement.style.scrollBehavior = 'auto';
         window.scrollTo(0, lastRequestedScrollY);
+        rootElement.style.scrollBehavior = previousInlineScrollBehavior;
         lastKnownSourceLine = Number.isFinite(sourceLine) ? sourceLine : sourceLineForScrollY(window.scrollY);
         synchronizedScrollTimer = window.setTimeout(() => {
           lastKnownSourceLine = sourceLineForScrollY(window.scrollY);
@@ -428,7 +433,8 @@ final class ModernPreviewViewController: NSViewController, WKNavigationDelegate,
       window.mojiDidChangeLayout = () => {
         window.clearTimeout(layoutStabilizationTimer);
         const currentLayoutGeneration = layoutChangeGeneration;
-        let remainingCorrections = 4;
+        // PlantUML 字体和复杂 SVG 可能在节点插入后继续分阶段完成排版，延长校正窗口可覆盖较慢机器。
+        let remainingCorrections = 12;
         const restoreStableLine = () => {
           if (currentLayoutGeneration !== layoutChangeGeneration) return;
           const stableLine = pendingLayoutSourceLine;
