@@ -1,5 +1,5 @@
 #!/bin/bash
-# 文件说明：墨记本地发布脚本，构建通用架构应用并生成经过校验的 DMG 安装包。
+# 文件说明：墨记本地发布脚本，按指定架构构建应用并生成经过校验的 DMG 安装包。
 # 作者：Codex
 # 创建时间：2026-07-29
 
@@ -7,13 +7,39 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 INFO_PLIST="$ROOT_DIR/InkMark/InkMark-Info.plist"
-DERIVED_DATA="$ROOT_DIR/DerivedData"
+TARGET_ARCH="${1:-universal}"
+if [[ "$#" -gt 1 ]]; then
+  echo "用法：./package.sh [universal|arm64|x86_64]" >&2
+  exit 1
+fi
+
+# 架构参数同时决定 Xcode 构建目标和独立安装包中需要移除的另一套 Java 运行时。
+case "$TARGET_ARCH" in
+  universal)
+    BUILD_ARCHS="arm64 x86_64"
+    UNUSED_RUNTIME=""
+    ;;
+  arm64)
+    BUILD_ARCHS="arm64"
+    UNUSED_RUNTIME="runtime-x86_64"
+    ;;
+  x86_64)
+    BUILD_ARCHS="x86_64"
+    UNUSED_RUNTIME="runtime-arm64"
+    ;;
+  *)
+    echo "不支持的目标架构：$TARGET_ARCH；可选值为 universal、arm64、x86_64。" >&2
+    exit 1
+    ;;
+esac
+
+DERIVED_DATA="$ROOT_DIR/DerivedData/$TARGET_ARCH"
 APP_PATH="$DERIVED_DATA/Build/Products/Release/墨记.app"
 OUTPUT_DIR="$ROOT_DIR/outputs"
 VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$INFO_PLIST")"
 BUILD_NUMBER="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$INFO_PLIST")"
 DATE_TAG="$(date +%Y%m%d)"
-DMG_PATH="$OUTPUT_DIR/墨记-$VERSION-$DATE_TAG.dmg"
+DMG_PATH="$OUTPUT_DIR/墨记-$VERSION-$TARGET_ARCH-$DATE_TAG.dmg"
 STAGING_DIR="$(mktemp -d "${TMPDIR:-/tmp}/moji-release.XXXXXX")"
 
 # 无论构建在哪一步结束，都清理仅用于组装 DMG 的临时目录。
@@ -22,17 +48,22 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "[墨记] 正在构建 Release 版本 ${VERSION}（${BUILD_NUMBER}）..."
+echo "[墨记] 正在构建 Release 版本 ${VERSION}（${BUILD_NUMBER}），目标架构：${TARGET_ARCH}..."
 xcodebuild \
   -project "$ROOT_DIR/InkMark.xcodeproj" \
   -scheme InkMark \
   -configuration Release \
   -destination "generic/platform=macOS" \
   -derivedDataPath "$DERIVED_DATA" \
-  ARCHS="arm64 x86_64" \
+  ARCHS="$BUILD_ARCHS" \
   ONLY_ACTIVE_ARCH=NO \
   CODE_SIGNING_ALLOWED=NO \
   build
+
+# 独立架构包不携带无法使用的另一套 Java 运行时，可明显减少下载和安装体积。
+if [[ -n "$UNUSED_RUNTIME" ]]; then
+  rm -rf "$APP_PATH/Contents/Resources/PlantUML/$UNUSED_RUNTIME"
+fi
 
 echo "[墨记] 正在执行本地临时签名与校验..."
 codesign --force --deep --sign - --identifier io.github.dingyi60.moji "$APP_PATH"
@@ -54,5 +85,6 @@ echo "[墨记] 正在验证磁盘映像..."
 hdiutil verify "$DMG_PATH"
 
 echo "[墨记] 发布产物：${DMG_PATH}"
+echo "[墨记] 目标架构：${TARGET_ARCH}"
 echo "[墨记] 应用架构：$(lipo -archs "$APP_PATH/Contents/MacOS/墨记")"
 echo "[墨记] SHA-256：$(shasum -a 256 "$DMG_PATH" | awk '{print $1}')"

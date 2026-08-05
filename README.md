@@ -130,13 +130,15 @@ xcrun swiftc \
 
 ## 打包安装包
 
-运行发布脚本可构建同时支持 Apple Silicon 与 Intel 的通用架构应用，并生成 DMG（macOS 磁盘映像安装包）：
+运行发布脚本可按需构建通用架构、Apple Silicon 或 Intel 应用，并生成 DMG（macOS 磁盘映像安装包）：
 
 ```bash
 ./package.sh
+./package.sh arm64
+./package.sh x86_64
 ```
 
-脚本会依次执行 Release（发布版）构建、本地临时签名、签名校验和 DMG 校验。产物保存在 `outputs/`，命令末尾会输出 SHA-256（文件完整性摘要）。
+不传参数时默认生成 `universal` 通用架构包。脚本会依次执行 Release（发布版）构建、本地临时签名、签名校验和 DMG 校验。产物保存在 `outputs/`，命令末尾会输出 SHA-256（文件完整性摘要）。独立架构包会移除无法使用的另一套 Java 运行时，以减少下载体积。
 
 ## 自动发布
 
@@ -144,9 +146,9 @@ xcrun swiftc \
 
 1. 校验标签版本与 `InkMark-Info.plist` 一致。
 2. 运行 Markdown 冒烟测试和真实预览运行时测试。
-3. 构建同时支持 Apple Silicon 与 Intel 的 Release 应用。
-4. 生成并校验 DMG 安装包及 SHA-256 文件。
-5. 创建或更新对应 GitHub Release，并附加两个产物。
+3. 分别构建通用架构、Apple Silicon 和 Intel 三种 Release 应用。
+4. 生成并校验三个 DMG 安装包及各自的 SHA-256 文件。
+5. 创建或更新对应 GitHub Release，并附加六个产物。
 
 发布 `1.0.0` 的命令：
 
