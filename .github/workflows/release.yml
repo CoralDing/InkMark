@@ -1,0 +1,146 @@
+# 文件说明：墨记 GitHub Release 自动发布流程，按版本标签构建并上传 macOS 通用安装包。
+# 作者：dingyi60(Codex)
+# 创建时间：2026-08-05
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "发布标签，例如 v1.0.0"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and publish macOS DMG
+    runs-on: macos-15
+    timeout-minutes: 30
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate release version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$RELEASE_TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "发布标签必须使用 v1.0.0 形式，当前值：$RELEASE_TAG" >&2
+            exit 1
+          fi
+
+          VERSION="${BASH_REMATCH[1]}"
+          PLIST_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' InkMark/InkMark-Info.plist)"
+          if [[ "$VERSION" != "$PLIST_VERSION" ]]; then
+            echo "标签版本 $VERSION 与 Info.plist 版本 $PLIST_VERSION 不一致。" >&2
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Validate project files
+        run: |
+          plutil -lint InkMark/InkMark-Info.plist InkMark.xcodeproj/project.pbxproj
+          xmllint --noout InkMark.xcodeproj/xcshareddata/xcschemes/InkMark.xcscheme
+
+      - name: Test Markdown renderer
+        run: |
+          xcrun swiftc \
+            InkMark/Sources/Core/Markdown/ModernMarkdownRenderer.swift \
+            Tests/RendererSmokeTests/main.swift \
+            -o /tmp/moji-renderer-tests
+          /tmp/moji-renderer-tests
+
+      - name: Test preview runtime
+        run: |
+          xcrun swiftc \
+            -framework AppKit \
+            -framework WebKit \
+            InkMark/Sources/Core/Markdown/ModernMarkdownRenderer.swift \
+            InkMark/Sources/Core/Preferences/MojiPreferences.swift \
+            InkMark/Sources/Core/Plugins/MojiPluginManager.swift \
+            InkMark/Sources/Core/Diagram/MojiPlantUMLRenderer.swift \
+            InkMark/Sources/Features/Preview/Modern/ModernPreviewViewController.swift \
+            Tests/PreviewRuntimeTests/main.swift \
+            -o /tmp/moji-preview-runtime-tests
+          /tmp/moji-preview-runtime-tests \
+            "$GITHUB_WORKSPACE/Examples/墨记完整功能演示.md"
+
+      - name: Build release DMG
+        run: ./package.sh
+
+      - name: Prepare release assets
+        id: assets
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          SOURCE_DMG="$(find outputs -maxdepth 1 -type f -name "墨记-${VERSION}-*.dmg" -print -quit)"
+          if [[ -z "$SOURCE_DMG" ]]; then
+            echo "没有找到版本 ${VERSION} 的 DMG 产物。" >&2
+            exit 1
+          fi
+
+          RELEASE_DMG="outputs/墨记-${VERSION}-macOS-universal.dmg"
+          CHECKSUM_FILE="${RELEASE_DMG}.sha256"
+          mv "$SOURCE_DMG" "$RELEASE_DMG"
+          (
+            cd outputs
+            shasum -a 256 "$(basename "$RELEASE_DMG")" > "$(basename "$CHECKSUM_FILE")"
+          )
+
+          echo "dmg=$RELEASE_DMG" >> "$GITHUB_OUTPUT"
+          echo "checksum=$CHECKSUM_FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: 墨记-${{ steps.version.outputs.version }}-macOS
+          path: |
+            ${{ steps.assets.outputs.dmg }}
+            ${{ steps.assets.outputs.checksum }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Create or update GitHub Release
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          DMG_PATH: ${{ steps.assets.outputs.dmg }}
+          CHECKSUM_PATH: ${{ steps.assets.outputs.checksum }}
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" \
+              "$DMG_PATH" \
+              "$CHECKSUM_PATH" \
+              --clobber \
+              --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$RELEASE_TAG" \
+              "$DMG_PATH" \
+              "$CHECKSUM_PATH" \
+              --title "墨记 ${VERSION}" \
+              --generate-notes \
+              --target "$GITHUB_SHA" \
+              --repo "$GITHUB_REPOSITORY"
+          fi
