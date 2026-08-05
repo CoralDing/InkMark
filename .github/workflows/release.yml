@@ -121,7 +121,8 @@ jobs:
             exit 1
           fi
 
-          RELEASE_DMG="outputs/墨记-${VERSION}-macOS-universal.dmg"
+          # GitHub Release 会清理附件文件名中的非 ASCII 字符，使用英文品牌名可避免中文前缀被移除。
+          RELEASE_DMG="outputs/InkMark-${VERSION}-macOS-universal.dmg"
           CHECKSUM_FILE="${RELEASE_DMG}.sha256"
           mv "$SOURCE_DMG" "$RELEASE_DMG"
           (
