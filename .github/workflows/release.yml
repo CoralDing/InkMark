@@ -70,7 +70,28 @@ jobs:
           /tmp/moji-renderer-tests
 
       - name: Test preview runtime
+        shell: bash
         run: |
+          set -euo pipefail
+          TEST_ROOT="$(mktemp -d "${RUNNER_TEMP}/moji-preview-runtime.XXXXXX")"
+          TEST_APP="${TEST_ROOT}/MojiPreviewRuntimeTests.app"
+          TEST_EXECUTABLE="${TEST_APP}/Contents/MacOS/MojiPreviewRuntimeTests"
+          trap 'rm -rf "$TEST_ROOT"' EXIT
+
+          # 预览依赖 Bundle.main 查找本地脚本和 PlantUML 运行时，测试程序必须具备标准应用包结构。
+          mkdir -p "${TEST_APP}/Contents/MacOS" "${TEST_APP}/Contents/Resources"
+          cp InkMark/InkMark-Info.plist "${TEST_APP}/Contents/Info.plist"
+          /usr/libexec/PlistBuddy \
+            -c 'Set :CFBundleExecutable MojiPreviewRuntimeTests' \
+            "${TEST_APP}/Contents/Info.plist"
+          cp \
+            InkMark/Resources/mermaid.min.js \
+            InkMark/Resources/katex.min.js \
+            InkMark/Resources/katex-auto-render.min.js \
+            InkMark/Resources/katex.min.css \
+            "${TEST_APP}/Contents/Resources/"
+          cp -R InkMark/Resources/PlantUML "${TEST_APP}/Contents/Resources/"
+
           xcrun swiftc \
             -framework AppKit \
             -framework WebKit \
@@ -80,8 +101,8 @@ jobs:
             InkMark/Sources/Core/Diagram/MojiPlantUMLRenderer.swift \
             InkMark/Sources/Features/Preview/Modern/ModernPreviewViewController.swift \
             Tests/PreviewRuntimeTests/main.swift \
-            -o /tmp/moji-preview-runtime-tests
-          /tmp/moji-preview-runtime-tests \
+            -o "$TEST_EXECUTABLE"
+          "$TEST_EXECUTABLE" \
             "$GITHUB_WORKSPACE/Examples/墨记完整功能演示.md"
 
       - name: Build release DMG
