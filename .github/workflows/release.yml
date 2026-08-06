@@ -31,12 +31,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # jlink 只能输出与当前机器架构一致的原生库，两个运行时必须分别在对应架构的 macOS 构建机生成。
+          # setup-java 会安装与目标一致的 JDK；macOS 15 的 Apple Silicon 构建机已提供 Rosetta，可执行 x86_64 JDK 生成 Intel 运行时。
           - architecture: arm64
             runner: macos-15
             java_architecture: aarch64
           - architecture: x86_64
-            runner: macos-13
+            runner: macos-15
             java_architecture: x64
 
     steps:
