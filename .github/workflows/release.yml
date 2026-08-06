@@ -23,8 +23,47 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  prepare-plantuml-runtime:
+    name: Build PlantUML runtime (${{ matrix.architecture }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # jlink 只能输出与当前机器架构一致的原生库，两个运行时必须分别在对应架构的 macOS 构建机生成。
+          - architecture: arm64
+            runner: macos-15
+            java_architecture: aarch64
+          - architecture: x86_64
+            runner: macos-13
+            java_architecture: x64
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Temurin JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17.0.20+8
+          architecture: ${{ matrix.java_architecture }}
+
+      - name: Build minimal PlantUML runtime
+        run: scripts/build-plantuml-runtime.sh "$RUNNER_TEMP/runtime-${{ matrix.architecture }}"
+
+      - name: Upload minimal PlantUML runtime
+        uses: actions/upload-artifact@v4
+        with:
+          name: plantuml-runtime-${{ matrix.architecture }}
+          path: ${{ runner.temp }}/runtime-${{ matrix.architecture }}
+          if-no-files-found: error
+          retention-days: 1
+
   release:
     name: Build and publish macOS DMG
+    needs: prepare-plantuml-runtime
     runs-on: macos-15
     timeout-minutes: 30
     env:
@@ -36,6 +75,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Download minimal PlantUML runtimes
+        uses: actions/download-artifact@v4
+        with:
+          pattern: plantuml-runtime-*
+          path: ${{ runner.temp }}/plantuml-runtimes
+
+      - name: Install minimal PlantUML runtimes
+        shell: bash
+        run: |
+          set -euo pipefail
+          # 运行时来自对应架构的构建机，替换源码中完整 JRE 后再进行预览测试和发布打包。
+          rm -rf InkMark/Resources/PlantUML/runtime-arm64 InkMark/Resources/PlantUML/runtime-x86_64
+          cp -R "$RUNNER_TEMP/plantuml-runtimes/plantuml-runtime-arm64" InkMark/Resources/PlantUML/runtime-arm64
+          cp -R "$RUNNER_TEMP/plantuml-runtimes/plantuml-runtime-x86_64" InkMark/Resources/PlantUML/runtime-x86_64
 
       - name: Validate release version
         id: version
