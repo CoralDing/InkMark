@@ -42,7 +42,7 @@ Copyright (c) 2009-2024 Arnaud Roques
 
 ## Eclipse Temurin
 
-Eclipse Temurin 17.0.20+8 JRE 为 PlantUML 提供本地 Java 运行环境。墨记同时分发 Apple 芯片与 Intel 版本，按照 GNU GPL v2 with Classpath Exception 分发。
+Eclipse Temurin 17.0.20+8 JRE 为 PlantUML 提供本地 Java 运行环境。发布流程会用 `jlink` 仅保留 PlantUML 所需的 Java 模块，并分别生成 Apple 芯片与 Intel 版本；两者均按照 GNU GPL v2 with Classpath Exception 分发。
 
 概览见 [LICENSES/Temurin.txt](LICENSES/Temurin.txt)；每套运行时的 `Contents/Home/legal/` 目录和 `NOTICE` 文件均完整保留在应用资源中。
 
