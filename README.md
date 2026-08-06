@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  macOS 11.0+ · Apple Silicon 与 Intel · 当前版本 1.0.0 · MIT License
+  macOS 11.0+ · Apple Silicon 与 Intel · 当前版本 1.0.1 · MIT License
 </p>
 
 墨记是一款面向 macOS 的原生 Markdown 编辑器与阅读器。它专注于安静、直接的写作体验，将源码编辑、实时预览和沉浸阅读放在同一个窗口中，并为 Mermaid、PlantUML、KaTeX 数学公式和本地插件提供完整支持。
