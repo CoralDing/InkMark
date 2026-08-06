@@ -87,15 +87,15 @@ jobs:
       - name: Download minimal arm64 PlantUML runtime
         uses: actions/download-artifact@v4
         with:
-          # 单独下载会把运行时的 Contents 目录直接写入目标位置，保持应用所需的目录结构。
+          # 归档保留 runtime-arm64 根目录，下载到 PlantUML 父目录后得到正确的应用路径。
           name: plantuml-runtime-arm64
-          path: InkMark/Resources/PlantUML/runtime-arm64
+          path: InkMark/Resources/PlantUML
 
       - name: Download minimal x86_64 PlantUML runtime
         uses: actions/download-artifact@v4
         with:
           name: plantuml-runtime-x86_64
-          path: InkMark/Resources/PlantUML/runtime-x86_64
+          path: InkMark/Resources/PlantUML
 
       - name: Validate minimal PlantUML runtimes
         shell: bash
