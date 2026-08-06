@@ -77,7 +77,11 @@ jobs:
           chmod +x "$COMPONENT_DIRECTORY/runtime-${{ matrix.architecture }}/Contents/Home/bin/java"
           # keepParent 固定 ZIP 根目录，客户端可以同时校验 JAR 与对应架构运行时。
           ditto -c -k --sequesterRsrc --keepParent "$COMPONENT_DIRECTORY" "$ARCHIVE"
-          shasum -a 256 "$ARCHIVE" > "$CHECKSUM_FILE"
+          # 校验文件只记录 ZIP 文件名，避免下载到另一个构建任务后绝对路径失效。
+          (
+            cd "$(dirname "$ARCHIVE")"
+            shasum -a 256 "$(basename "$ARCHIVE")" > "$CHECKSUM_FILE"
+          )
           test -s "$ARCHIVE"
           test -s "$CHECKSUM_FILE"
 
@@ -127,7 +131,11 @@ jobs:
             CHECKSUM_FILE="${ARCHIVE}.sha256"
             test -s "$ARCHIVE"
             test -s "$CHECKSUM_FILE"
-            shasum -a 256 -c "$CHECKSUM_FILE"
+            # 组件校验文件使用相对文件名，必须在附件下载目录内执行校验。
+            (
+              cd "$(dirname "$ARCHIVE")"
+              shasum -a 256 -c "$(basename "$CHECKSUM_FILE")"
+            )
           done
 
       - name: Validate release version
