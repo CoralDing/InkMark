@@ -87,23 +87,25 @@ jobs:
       - name: Download minimal arm64 PlantUML runtime
         uses: actions/download-artifact@v4
         with:
-          # 归档保留 runtime-arm64 根目录，下载到 PlantUML 父目录后得到正确的应用路径。
+          # 单个 Artifact 的归档根目录是 Contents，直接写入对应运行时目录。
           name: plantuml-runtime-arm64
-          path: InkMark/Resources/PlantUML
+          path: InkMark/Resources/PlantUML/runtime-arm64
 
       - name: Download minimal x86_64 PlantUML runtime
         uses: actions/download-artifact@v4
         with:
           name: plantuml-runtime-x86_64
-          path: InkMark/Resources/PlantUML
+          path: InkMark/Resources/PlantUML/runtime-x86_64
 
       - name: Validate minimal PlantUML runtimes
         shell: bash
         run: |
           set -euo pipefail
-          # 先验证运行时目录结构；后续真实 WKWebView 预览测试会实际启动当前架构的 Java。
+          # Artifact 归档不保留 Unix 可执行权限，必须在应用打包前显式恢复 Java 启动文件权限。
           ARM_JAVA="InkMark/Resources/PlantUML/runtime-arm64/Contents/Home/bin/java"
           INTEL_JAVA="InkMark/Resources/PlantUML/runtime-x86_64/Contents/Home/bin/java"
+          chmod +x "$ARM_JAVA" "$INTEL_JAVA"
+          # 后续真实 WKWebView 预览测试会实际启动当前架构的 Java。
           test -x "$ARM_JAVA"
           test -x "$INTEL_JAVA"
 
