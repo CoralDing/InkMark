@@ -76,20 +76,37 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download minimal PlantUML runtimes
-        uses: actions/download-artifact@v4
-        with:
-          pattern: plantuml-runtime-*
-          path: ${{ runner.temp }}/plantuml-runtimes
-
-      - name: Install minimal PlantUML runtimes
+      - name: Remove source PlantUML runtimes
         shell: bash
         run: |
           set -euo pipefail
-          # 运行时来自对应架构的构建机，替换源码中完整 JRE 后再进行预览测试和发布打包。
+          # 下载动作会保留目标目录已有文件，先清除仓库中的完整 JRE，确保 DMG 只包含裁剪后的运行时。
           rm -rf InkMark/Resources/PlantUML/runtime-arm64 InkMark/Resources/PlantUML/runtime-x86_64
-          cp -R "$RUNNER_TEMP/plantuml-runtimes/plantuml-runtime-arm64" InkMark/Resources/PlantUML/runtime-arm64
-          cp -R "$RUNNER_TEMP/plantuml-runtimes/plantuml-runtime-x86_64" InkMark/Resources/PlantUML/runtime-x86_64
+
+      - name: Download minimal arm64 PlantUML runtime
+        uses: actions/download-artifact@v4
+        with:
+          # 单独下载会将归档内容直接写入指定目录，避免多产物下载时额外生成一层目录。
+          name: plantuml-runtime-arm64
+          path: InkMark/Resources/PlantUML/runtime-arm64
+
+      - name: Download minimal x86_64 PlantUML runtime
+        uses: actions/download-artifact@v4
+        with:
+          name: plantuml-runtime-x86_64
+          path: InkMark/Resources/PlantUML/runtime-x86_64
+
+      - name: Validate minimal PlantUML runtimes
+        shell: bash
+        run: |
+          set -euo pipefail
+          # 同时验证目录结构和 CPU 架构，防止运行时再次以错误层级或错误架构进入发布包。
+          ARM_JAVA="InkMark/Resources/PlantUML/runtime-arm64/Contents/Home/bin/java"
+          INTEL_JAVA="InkMark/Resources/PlantUML/runtime-x86_64/Contents/Home/bin/java"
+          test -x "$ARM_JAVA"
+          test -x "$INTEL_JAVA"
+          [[ "$(file -b "$ARM_JAVA")" == *"arm64"* ]]
+          [[ "$(file -b "$INTEL_JAVA")" == *"x86_64"* ]]
 
       - name: Validate release version
         id: version
