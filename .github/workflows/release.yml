@@ -57,7 +57,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: plantuml-runtime-${{ matrix.architecture }}
-          path: ${{ runner.temp }}/runtime-${{ matrix.architecture }}
+          # 归档从 Contents 开始；下载到应用的 runtime-* 目录后可直接得到 Contents/Home/bin/java。
+          path: ${{ runner.temp }}/runtime-${{ matrix.architecture }}/Contents
           if-no-files-found: error
           retention-days: 1
 
@@ -86,7 +87,7 @@ jobs:
       - name: Download minimal arm64 PlantUML runtime
         uses: actions/download-artifact@v4
         with:
-          # 单独下载会将归档内容直接写入指定目录，避免多产物下载时额外生成一层目录。
+          # 单独下载会把归档根目录 Contents 直接写入运行时目录，保持应用所需的目录结构。
           name: plantuml-runtime-arm64
           path: InkMark/Resources/PlantUML/runtime-arm64
 
