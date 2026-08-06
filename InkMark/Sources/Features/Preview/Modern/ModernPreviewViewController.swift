@@ -23,6 +23,7 @@ final class ModernPreviewViewController: NSViewController, WKNavigationDelegate,
     private var pendingScrollRatio: Double = 0
     private var loadGeneration = 0
     private var hasRequestedInitialLoad = false
+    private var hasPresentedPlantUMLInstallPrompt = false
     private var localImageCache: [URL: CachedLocalImage] = [:]
     var onScrollSourceLineChange: ((Double) -> Void)?
 
@@ -255,6 +256,17 @@ final class ModernPreviewViewController: NSViewController, WKNavigationDelegate,
             return
         }
 
+        // PlantUML 是唯一按需下载的核心能力。缺少组件时先回传可理解的占位错误，再以原生弹窗提供下载入口。
+        guard MojiPlantUMLComponentManager.shared.componentURLs() != nil else {
+            completePlantUML(
+                identifier: identifier,
+                svg: nil,
+                errorMessage: "需要安装 PlantUML 本地组件后才能生成此图表。"
+            )
+            presentPlantUMLInstallPromptIfNeeded()
+            return
+        }
+
         let requestGeneration = loadGeneration
         MojiPlantUMLRenderer.shared.render(source: source) { [weak self] result in
             guard let self, requestGeneration == self.loadGeneration else { return }
@@ -279,6 +291,59 @@ final class ModernPreviewViewController: NSViewController, WKNavigationDelegate,
             return
         }
         webView.evaluateJavaScript("window.mojiCompletePlantUML?.(...\(json))", completionHandler: nil)
+    }
+
+    /// 在当前预览会话中只提示一次，避免一篇含多个 UML 图的文档连续弹出相同对话框。
+    private func presentPlantUMLInstallPromptIfNeeded() {
+        guard !hasPresentedPlantUMLInstallPrompt else { return }
+        hasPresentedPlantUMLInstallPrompt = true
+
+        let alert = NSAlert()
+        alert.messageText = "安装 PlantUML 图表组件？"
+        alert.informativeText = "PlantUML 需要额外下载当前 Mac 架构的本地组件。组件仅在生成 UML 图时使用，图表源码不会上传。"
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "在线下载")
+        alert.addButton(withTitle: "以后再说")
+
+        let handleResponse: (NSApplication.ModalResponse) -> Void = { [weak self] response in
+            guard response == .alertFirstButtonReturn else { return }
+            self?.downloadPlantUMLComponent()
+        }
+        if let window = view.window {
+            alert.beginSheetModal(for: window, completionHandler: handleResponse)
+        } else {
+            handleResponse(alert.runModal())
+        }
+    }
+
+    /// 在线安装完成后保留当前阅读比例重新加载页面，使已经显示的 UML 源码自动替换为 SVG 图表。
+    private func downloadPlantUMLComponent() {
+        MojiPlantUMLComponentManager.shared.installLatest { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success:
+                self.reloadAfterPlantUMLComponentInstallation()
+            case .failure(let error):
+                // 下载失败后允许用户在网络恢复或组件附件发布后再次触发安装提示。
+                self.hasPresentedPlantUMLInstallPrompt = false
+                let alert = NSAlert(error: error)
+                if let window = self.view.window {
+                    alert.beginSheetModal(for: window)
+                } else {
+                    alert.runModal()
+                }
+            }
+        }
+    }
+
+    /// 获取现有页面滚动比例后再 reload（重新载入），避免大文档下载组件后跳回顶部。
+    private func reloadAfterPlantUMLComponentInstallation() {
+        let scrollScript = "window.scrollY / Math.max(1, document.documentElement.scrollHeight - window.innerHeight)"
+        webView.evaluateJavaScript(scrollScript) { [weak self] result, _ in
+            guard let self else { return }
+            self.pendingScrollRatio = (result as? NSNumber)?.doubleValue ?? self.pendingScrollRatio
+            self.webView.reload()
+        }
     }
 
     /// 预览滚动同步脚本：在源行锚点之间双向插值，并抑制原生代码触发的回传事件。

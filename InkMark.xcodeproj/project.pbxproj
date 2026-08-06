@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0A1B2C3D4E5F60718293A4B5 /* MojiPlantUMLRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708192A3B4C5 /* MojiPlantUMLRenderer.swift */; };
-		0A1B2C3D4E5F60718293A4B6 /* PlantUML in Resources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708192A3B4C6 /* PlantUML */; };
+		0A1B2C3D4E5F60718293A4B7 /* MojiPlantUMLComponentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708192A3B4C7 /* MojiPlantUMLComponentManager.swift */; };
 		219F97214986ECB62227B8B6 /* MojiPluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDCDC1F503642BAD5845D220 /* MojiPluginManager.swift */; };
 		24D8C7A4B3694F69A1D827A1 /* MojiPreferencesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E2A83B41BE44BFA8FBC0E23 /* MojiPreferencesWindowController.swift */; };
 		520C3DB89E8FFD7EAC597B09 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 201FE1C0AFEF29F60A51A589 /* Cocoa.framework */; };
@@ -30,7 +30,7 @@
 
 /* Begin PBXFileReference section */
 		1A2B3C4D5E6F708192A3B4C5 /* MojiPlantUMLRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MojiPlantUMLRenderer.swift; path = InkMark/Sources/Core/Diagram/MojiPlantUMLRenderer.swift; sourceTree = SOURCE_ROOT; };
-		1A2B3C4D5E6F708192A3B4C6 /* PlantUML */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder; name = PlantUML; path = InkMark/Resources/PlantUML; sourceTree = SOURCE_ROOT; };
+		1A2B3C4D5E6F708192A3B4C7 /* MojiPlantUMLComponentManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MojiPlantUMLComponentManager.swift; path = InkMark/Sources/Core/Diagram/MojiPlantUMLComponentManager.swift; sourceTree = SOURCE_ROOT; };
 		201FE1C0AFEF29F60A51A589 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		443152CF423236D26AC82124 /* 墨记.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "墨记.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B82BF81BCF4465BCC180BC2 /* Images.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = InkMark/Images.xcassets; sourceTree = SOURCE_ROOT; };
@@ -84,7 +84,6 @@
 			isa = PBXGroup;
 			children = (
 				B415D72B55288209ACE3B345 /* MarkdownDocument.icns */,
-				1A2B3C4D5E6F708192A3B4C6 /* PlantUML */,
 				F1A2B3C4D5E6F708192A3B4C /* mermaid.min.js */,
 				B1C2D3E4F5061728394A5B01 /* katex.min.js */,
 				B1C2D3E4F5061728394A5B02 /* katex-auto-render.min.js */,
@@ -162,6 +161,7 @@
 			isa = PBXGroup;
 			children = (
 				1A2B3C4D5E6F708192A3B4C5 /* MojiPlantUMLRenderer.swift */,
+				1A2B3C4D5E6F708192A3B4C7 /* MojiPlantUMLComponentManager.swift */,
 			);
 			name = Diagram;
 			sourceTree = "<group>";
@@ -281,7 +281,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0A1B2C3D4E5F60718293A4B6 /* PlantUML in Resources */,
 				AD7575097045FE3764031FDF /* MarkdownDocument.icns in Resources */,
 				E0CAA77757F4159E44BE5539 /* Images.xcassets in Resources */,
 				E1A2B3C4D5E6F708192A3B4C /* mermaid.min.js in Resources */,
@@ -299,6 +298,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0A1B2C3D4E5F60718293A4B5 /* MojiPlantUMLRenderer.swift in Sources */,
+				0A1B2C3D4E5F60718293A4B7 /* MojiPlantUMLComponentManager.swift in Sources */,
 				6D3EAA71102A49D48F8C2141 /* main.swift in Sources */,
 				FCA6B605B18A4194955C51B1 /* MojiAppDelegate.swift in Sources */,
 				8A9F5E2704E13EA2491549F0 /* ModernMarkdownDocument.swift in Sources */,

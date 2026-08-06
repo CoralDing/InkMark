@@ -54,7 +54,7 @@
 
 - Mermaid 随应用分发并在本地运行，支持 `mermaid` 代码围栏。
 - 数学公式使用本地 KaTeX 渲染 `$...$`、`$$...$$` 和 `math` 代码围栏。
-- PlantUML 使用随应用分发的 PlantUML 与 Temurin JRE 在本机生成 SVG，支持 `plantuml` 和 `puml` 代码围栏。
+- PlantUML 在用户首次安装当前架构组件后使用本地 PlantUML 与 Temurin JRE 生成 SVG，支持 `plantuml` 和 `puml` 代码围栏，图表源码不会上传。
 - 上述能力属于 Markdown 格式支持，始终启用；插件总开关只控制目录、代码复制和用户脚本。
 
 ## 完整示例

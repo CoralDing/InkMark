@@ -23,8 +23,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  prepare-plantuml-runtime:
-    name: Build PlantUML runtime (${{ matrix.architecture }})
+  prepare-plantuml-component:
+    name: Build PlantUML component (${{ matrix.architecture }})
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 20
     strategy:
@@ -53,18 +53,47 @@ jobs:
       - name: Build minimal PlantUML runtime
         run: scripts/build-plantuml-runtime.sh "$RUNNER_TEMP/runtime-${{ matrix.architecture }}"
 
-      - name: Upload minimal PlantUML runtime
+      - name: Download PlantUML JAR
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --proto '=https' --tlsv1.2 \
+            --output "$RUNNER_TEMP/plantuml.jar" \
+            "https://github.com/plantuml/plantuml/releases/download/v1.2025.10/plantuml-1.2025.10.jar"
+          test -s "$RUNNER_TEMP/plantuml.jar"
+
+      - name: Package PlantUML component
+        shell: bash
+        run: |
+          set -euo pipefail
+          COMPONENT_ROOT="$RUNNER_TEMP/plantuml-component-${{ matrix.architecture }}"
+          COMPONENT_DIRECTORY="$COMPONENT_ROOT/PlantUML"
+          ARCHIVE="$RUNNER_TEMP/InkMark-PlantUML-${{ matrix.architecture }}.zip"
+          CHECKSUM_FILE="${ARCHIVE}.sha256"
+
+          mkdir -p "$COMPONENT_DIRECTORY"
+          cp "$RUNNER_TEMP/plantuml.jar" "$COMPONENT_DIRECTORY/plantuml.jar"
+          cp -R "$RUNNER_TEMP/runtime-${{ matrix.architecture }}" "$COMPONENT_DIRECTORY/runtime-${{ matrix.architecture }}"
+          chmod +x "$COMPONENT_DIRECTORY/runtime-${{ matrix.architecture }}/Contents/Home/bin/java"
+          # keepParent 固定 ZIP 根目录，客户端可以同时校验 JAR 与对应架构运行时。
+          ditto -c -k --sequesterRsrc --keepParent "$COMPONENT_DIRECTORY" "$ARCHIVE"
+          shasum -a 256 "$ARCHIVE" > "$CHECKSUM_FILE"
+          test -s "$ARCHIVE"
+          test -s "$CHECKSUM_FILE"
+
+      - name: Upload PlantUML component
         uses: actions/upload-artifact@v4
         with:
-          name: plantuml-runtime-${{ matrix.architecture }}
-          # 上传运行时根目录，下载动作会将其中的 Contents 写入应用的 runtime-* 目录。
-          path: ${{ runner.temp }}/runtime-${{ matrix.architecture }}
+          name: plantuml-component-${{ matrix.architecture }}
+          path: |
+            ${{ runner.temp }}/InkMark-PlantUML-${{ matrix.architecture }}.zip
+            ${{ runner.temp }}/InkMark-PlantUML-${{ matrix.architecture }}.zip.sha256
           if-no-files-found: error
           retention-days: 1
 
   release:
     name: Build and publish macOS DMG
-    needs: prepare-plantuml-runtime
+    needs: prepare-plantuml-component
     runs-on: macos-15
     timeout-minutes: 30
     env:
@@ -77,37 +106,29 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Remove source PlantUML runtimes
+      - name: Download arm64 PlantUML component
+        uses: actions/download-artifact@v4
+        with:
+          name: plantuml-component-arm64
+          path: ${{ runner.temp }}/plantuml-components
+
+      - name: Download x86_64 PlantUML component
+        uses: actions/download-artifact@v4
+        with:
+          name: plantuml-component-x86_64
+          path: ${{ runner.temp }}/plantuml-components
+
+      - name: Validate PlantUML component assets
         shell: bash
         run: |
           set -euo pipefail
-          # 下载动作会保留目标目录已有文件，先清除仓库中的完整 JRE，确保 DMG 只包含裁剪后的运行时。
-          rm -rf InkMark/Resources/PlantUML/runtime-arm64 InkMark/Resources/PlantUML/runtime-x86_64
-
-      - name: Download minimal arm64 PlantUML runtime
-        uses: actions/download-artifact@v4
-        with:
-          # 单个 Artifact 的归档根目录是 Contents，直接写入对应运行时目录。
-          name: plantuml-runtime-arm64
-          path: InkMark/Resources/PlantUML/runtime-arm64
-
-      - name: Download minimal x86_64 PlantUML runtime
-        uses: actions/download-artifact@v4
-        with:
-          name: plantuml-runtime-x86_64
-          path: InkMark/Resources/PlantUML/runtime-x86_64
-
-      - name: Validate minimal PlantUML runtimes
-        shell: bash
-        run: |
-          set -euo pipefail
-          # Artifact 归档不保留 Unix 可执行权限，必须在应用打包前显式恢复 Java 启动文件权限。
-          ARM_JAVA="InkMark/Resources/PlantUML/runtime-arm64/Contents/Home/bin/java"
-          INTEL_JAVA="InkMark/Resources/PlantUML/runtime-x86_64/Contents/Home/bin/java"
-          chmod +x "$ARM_JAVA" "$INTEL_JAVA"
-          # 后续真实 WKWebView 预览测试会实际启动当前架构的 Java。
-          test -x "$ARM_JAVA"
-          test -x "$INTEL_JAVA"
+          for ARCHITECTURE in arm64 x86_64; do
+            ARCHIVE="$RUNNER_TEMP/plantuml-components/InkMark-PlantUML-${ARCHITECTURE}.zip"
+            CHECKSUM_FILE="${ARCHIVE}.sha256"
+            test -s "$ARCHIVE"
+            test -s "$CHECKSUM_FILE"
+            shasum -a 256 -c "$CHECKSUM_FILE"
+          done
 
       - name: Validate release version
         id: version
@@ -141,6 +162,24 @@ jobs:
             -o /tmp/moji-renderer-tests
           /tmp/moji-renderer-tests
 
+      - name: Test PlantUML component manager
+        shell: bash
+        run: |
+          set -euo pipefail
+          TEST_ROOT="$(mktemp -d "${RUNNER_TEMP}/moji-plantuml-component.XXXXXX")"
+          TEST_HOME="${TEST_ROOT}/home"
+          COMPONENT_SOURCE="${TEST_ROOT}/component-source"
+          TEST_EXECUTABLE="${TEST_ROOT}/PlantUMLComponentManagerSmokeTests"
+          trap 'rm -rf "$TEST_ROOT"' EXIT
+
+          ditto -x -k "$RUNNER_TEMP/plantuml-components/InkMark-PlantUML-arm64.zip" "$COMPONENT_SOURCE"
+          xcrun swiftc \
+            InkMark/Sources/Core/Diagram/MojiPlantUMLComponentManager.swift \
+            InkMark/Sources/Core/Diagram/MojiPlantUMLRenderer.swift \
+            Tests/PlantUMLComponentManagerSmokeTests/main.swift \
+            -o "$TEST_EXECUTABLE"
+          CFFIXED_USER_HOME="$TEST_HOME" "$TEST_EXECUTABLE" "$COMPONENT_SOURCE/PlantUML"
+
       - name: Test preview runtime
         shell: bash
         run: |
@@ -150,7 +189,7 @@ jobs:
           TEST_EXECUTABLE="${TEST_APP}/Contents/MacOS/MojiPreviewRuntimeTests"
           trap 'rm -rf "$TEST_ROOT"' EXIT
 
-          # 预览依赖 Bundle.main 查找本地脚本和 PlantUML 运行时，测试程序必须具备标准应用包结构。
+          # 预览依赖 Bundle.main 查找本地脚本；PlantUML 组件则安装到测试用户的应用支持目录。
           mkdir -p "${TEST_APP}/Contents/MacOS" "${TEST_APP}/Contents/Resources"
           cp InkMark/InkMark-Info.plist "${TEST_APP}/Contents/Info.plist"
           /usr/libexec/PlistBuddy \
@@ -162,7 +201,12 @@ jobs:
             InkMark/Resources/katex-auto-render.min.js \
             InkMark/Resources/katex.min.css \
             "${TEST_APP}/Contents/Resources/"
-          cp -R InkMark/Resources/PlantUML "${TEST_APP}/Contents/Resources/"
+          TEST_HOME="${TEST_ROOT}/home"
+          TEST_COMPONENT_DIRECTORY="${TEST_HOME}/Library/Application Support/InkMark"
+          mkdir -p "$TEST_COMPONENT_DIRECTORY"
+          ditto -x -k "$RUNNER_TEMP/plantuml-components/InkMark-PlantUML-arm64.zip" "$TEST_COMPONENT_DIRECTORY"
+          # Artifact 不保留 Unix 可执行权限，组件安装器会恢复；测试直接解压时同样显式恢复。
+          chmod +x "$TEST_COMPONENT_DIRECTORY/PlantUML/runtime-arm64/Contents/Home/bin/java"
 
           xcrun swiftc \
             -framework AppKit \
@@ -170,11 +214,13 @@ jobs:
             InkMark/Sources/Core/Markdown/ModernMarkdownRenderer.swift \
             InkMark/Sources/Core/Preferences/MojiPreferences.swift \
             InkMark/Sources/Core/Plugins/MojiPluginManager.swift \
+            InkMark/Sources/Core/Diagram/MojiPlantUMLComponentManager.swift \
             InkMark/Sources/Core/Diagram/MojiPlantUMLRenderer.swift \
             InkMark/Sources/Features/Preview/Modern/ModernPreviewViewController.swift \
             Tests/PreviewRuntimeTests/main.swift \
             -o "$TEST_EXECUTABLE"
-          "$TEST_EXECUTABLE" \
+          # Foundation 使用 CFFIXED_USER_HOME 而非 HOME 解析应用支持目录，确保测试不污染构建机用户目录。
+          CFFIXED_USER_HOME="$TEST_HOME" "$TEST_EXECUTABLE" \
             "$GITHUB_WORKSPACE/Examples/墨记完整功能演示.md"
 
       - name: Build release DMGs
@@ -207,11 +253,23 @@ jobs:
             )
           done
 
+          # 组件附件使用稳定文件名，应用可通过 releases/latest/download 自动获取当前架构版本。
+          for ARCHITECTURE in arm64 x86_64; do
+            COMPONENT_ARCHIVE="$RUNNER_TEMP/plantuml-components/InkMark-PlantUML-${ARCHITECTURE}.zip"
+            COMPONENT_CHECKSUM="${COMPONENT_ARCHIVE}.sha256"
+            test -s "$COMPONENT_ARCHIVE"
+            test -s "$COMPONENT_CHECKSUM"
+            cp "$COMPONENT_ARCHIVE" "outputs/InkMark-PlantUML-${ARCHITECTURE}.zip"
+            cp "$COMPONENT_CHECKSUM" "outputs/InkMark-PlantUML-${ARCHITECTURE}.zip.sha256"
+          done
+
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
         with:
           name: 墨记-${{ steps.version.outputs.version }}-macOS
-          path: outputs/InkMark-${{ steps.version.outputs.version }}-macOS-*.dmg*
+          path: |
+            outputs/InkMark-${{ steps.version.outputs.version }}-macOS-*.dmg*
+            outputs/InkMark-PlantUML-*.zip*
           if-no-files-found: error
           retention-days: 14
 
@@ -224,9 +282,13 @@ jobs:
           RELEASE_ASSETS=(
             outputs/InkMark-"${VERSION}"-macOS-*.dmg
             outputs/InkMark-"${VERSION}"-macOS-*.dmg.sha256
+            outputs/InkMark-PlantUML-arm64.zip
+            outputs/InkMark-PlantUML-arm64.zip.sha256
+            outputs/InkMark-PlantUML-x86_64.zip
+            outputs/InkMark-PlantUML-x86_64.zip.sha256
           )
-          if [[ "${#RELEASE_ASSETS[@]}" -ne 6 ]]; then
-            echo "发布产物数量异常，期望 6 个，实际 ${#RELEASE_ASSETS[@]} 个。" >&2
+          if [[ "${#RELEASE_ASSETS[@]}" -ne 10 ]]; then
+            echo "发布产物数量异常，期望 10 个，实际 ${#RELEASE_ASSETS[@]} 个。" >&2
             exit 1
           fi
 

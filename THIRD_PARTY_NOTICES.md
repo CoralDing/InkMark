@@ -8,7 +8,7 @@
 
 ## 当前运行依赖
 
-墨记链接 macOS 系统提供的 Cocoa/AppKit、Foundation 和 WebKit 框架，并随应用打包 Mermaid、KaTeX、PlantUML 与 Temurin JRE。
+墨记链接 macOS 系统提供的 Cocoa/AppKit、Foundation 和 WebKit 框架，并随应用打包 Mermaid 与 KaTeX。PlantUML 和 Temurin JRE 以独立按需组件形式通过 Release 分发，不包含在默认 DMG。
 
 ## Mermaid
 
@@ -32,7 +32,7 @@ Copyright (c) 2013-2020 Khan Academy and other contributors
 
 ## PlantUML
 
-PlantUML 1.2025.10 用于在本机把 `plantuml` 和 `puml` 代码块生成为 SVG，项目地址为 [plantuml/plantuml](https://github.com/plantuml/plantuml)，按照 GNU GPL v3 或更高版本分发。
+PlantUML 1.2025.10 用于在本机把 `plantuml` 和 `puml` 代码块生成为 SVG，项目地址为 [plantuml/plantuml](https://github.com/plantuml/plantuml)，按照 GNU GPL v3 或更高版本分发。它在用户选择安装对应组件后才会下载到本机。
 
 ```text
 Copyright (c) 2009-2024 Arnaud Roques
@@ -42,8 +42,8 @@ Copyright (c) 2009-2024 Arnaud Roques
 
 ## Eclipse Temurin
 
-Eclipse Temurin 17.0.20+8 JRE 为 PlantUML 提供本地 Java 运行环境。发布流程会用 `jlink` 仅保留 PlantUML 所需的 Java 模块，并分别生成 Apple 芯片与 Intel 版本；两者均按照 GNU GPL v2 with Classpath Exception 分发。
+Eclipse Temurin 17.0.20+8 JRE 为 PlantUML 提供本地 Java 运行环境。发布流程会用 `jlink` 仅保留 PlantUML 所需的 Java 模块，并分别生成 Apple 芯片与 Intel 版本的独立组件；两者均按照 GNU GPL v2 with Classpath Exception 分发。
 
-概览见 [LICENSES/Temurin.txt](LICENSES/Temurin.txt)；每套运行时的 `Contents/Home/legal/` 目录和 `NOTICE` 文件均完整保留在应用资源中。
+概览见 [LICENSES/Temurin.txt](LICENSES/Temurin.txt)；每套组件均完整保留其运行时的 `Contents/Home/legal/` 目录和 `NOTICE` 文件。
 
 用户自行安装的预览插件不属于墨记发行内容，其作者和分发者负责提供对应许可证与安全说明。

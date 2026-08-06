@@ -13,19 +13,16 @@ if [[ "$#" -gt 1 ]]; then
   exit 1
 fi
 
-# 架构参数同时决定 Xcode 构建目标和独立安装包中需要移除的另一套 Java 运行时。
+# 架构参数仅决定 Xcode 构建目标；PlantUML 运行时已改为单独按需下载组件，不再进入 DMG。
 case "$TARGET_ARCH" in
   universal)
     BUILD_ARCHS="arm64 x86_64"
-    UNUSED_RUNTIME=""
     ;;
   arm64)
     BUILD_ARCHS="arm64"
-    UNUSED_RUNTIME="runtime-x86_64"
     ;;
   x86_64)
     BUILD_ARCHS="x86_64"
-    UNUSED_RUNTIME="runtime-arm64"
     ;;
   *)
     echo "不支持的目标架构：$TARGET_ARCH；可选值为 universal、arm64、x86_64。" >&2
@@ -58,12 +55,7 @@ xcodebuild \
   ARCHS="$BUILD_ARCHS" \
   ONLY_ACTIVE_ARCH=NO \
   CODE_SIGNING_ALLOWED=NO \
-  build
-
-# 独立架构包不携带无法使用的另一套 Java 运行时，可明显减少下载和安装体积。
-if [[ -n "$UNUSED_RUNTIME" ]]; then
-  rm -rf "$APP_PATH/Contents/Resources/PlantUML/$UNUSED_RUNTIME"
-fi
+  clean build
 
 echo "[墨记] 正在执行本地临时签名与校验..."
 codesign --force --deep --sign - --identifier io.github.dingyi60.moji "$APP_PATH"

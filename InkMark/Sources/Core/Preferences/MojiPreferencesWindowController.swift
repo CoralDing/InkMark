@@ -90,6 +90,7 @@ final class MojiPreferencesWindowController: NSWindowController, NSTableViewData
     private let pluginsSwitch = NSSwitch()
     private let pluginPathLabel = NSTextField(labelWithString: MojiPluginManager.shared.pluginDirectory.path)
     private var selectedSection: SettingsSection = .general
+    private var plantUMLComponentObserver: NSObjectProtocol?
 
     private init() {
         let contentController = NSViewController()
@@ -119,12 +120,27 @@ final class MojiPreferencesWindowController: NSWindowController, NSTableViewData
         super.init(window: window)
         configureControls()
         buildInterface(in: contentController)
+        // 组件安装在后台进行；收到状态变化后只重建插件页，避免正在编辑的设置页出现错位。
+        plantUMLComponentObserver = NotificationCenter.default.addObserver(
+            forName: MojiPlantUMLComponentManager.didChangeNotification,
+            object: MojiPlantUMLComponentManager.shared,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handlePlantUMLComponentChange()
+        }
         reloadFromPreferences()
         selectSection(.general)
     }
 
     required init?(coder: NSCoder) {
         fatalError("MojiPreferencesWindowController 不支持从 Storyboard（可视化界面文件）创建。")
+    }
+
+    deinit {
+        // 设置窗口虽然通常与应用同生命周期一致，仍显式移除观察者以保证未来改为可释放窗口时没有悬挂回调。
+        if let plantUMLComponentObserver {
+            NotificationCenter.default.removeObserver(plantUMLComponentObserver)
+        }
     }
 
     /// 显示设置窗口并刷新设置状态。
@@ -446,9 +462,31 @@ final class MojiPreferencesWindowController: NSWindowController, NSTableViewData
             makeRow(label: "当前路径", detail: "插件目录完整路径", control: pluginPathLabel)
         ])
 
+        let componentManager = MojiPlantUMLComponentManager.shared
+        let plantUMLRow: NSView
+        if let component = componentManager.installedComponent() {
+            plantUMLRow = makeRow(
+                label: "PlantUML",
+                detail: "本地组件 \(component.formattedSize)，图表源码不会上传",
+                control: makePlantUMLActionControls()
+            )
+        } else if componentManager.isInstalling {
+            plantUMLRow = makeRow(
+                label: "PlantUML",
+                detail: "正在下载并校验当前 Mac 架构的本地组件",
+                value: "处理中"
+            )
+        } else {
+            plantUMLRow = makeRow(
+                label: "PlantUML",
+                detail: "按需安装；未使用 UML 时不增加应用体积",
+                control: makePlantUMLActionControls()
+            )
+        }
+
         let corePreviewSection = makeFormSection(title: "核心预览", rows: [
             makeRow(label: "Mermaid", detail: "在本机将 mermaid 代码块渲染为图表", value: "始终启用"),
-            makeRow(label: "PlantUML", detail: "使用内置 Java 运行时在本机生成 SVG", value: "始终启用"),
+            plantUMLRow,
             makeRow(label: "数学公式", detail: "使用本地 KaTeX 渲染 LaTeX 公式", value: "始终启用")
         ])
 
@@ -533,6 +571,27 @@ final class MojiPreferencesWindowController: NSWindowController, NSTableViewData
             action: #selector(rescanPlugins(_:))
         )
         let stack = NSStackView(views: [addButton, folderButton, refreshButton])
+        stack.orientation = .horizontal
+        stack.alignment = .centerY
+        stack.spacing = 6
+        return stack
+    }
+
+    /// PlantUML 的常用入口保持为一个主按钮，导入、移除等低频操作收进菜单，避免窄设置页控件拥挤。
+    private func makePlantUMLActionControls() -> NSView {
+        let componentManager = MojiPlantUMLComponentManager.shared
+        let installTitle = componentManager.installedComponent() == nil ? "在线下载…" : "重新下载…"
+        let installButton = makeButton(installTitle, action: #selector(downloadPlantUMLComponent(_:)))
+        installButton.isEnabled = !componentManager.isInstalling
+
+        let moreButton = makeIconButton(
+            symbolName: "ellipsis.circle",
+            toolTip: "PlantUML 更多操作",
+            action: #selector(showPlantUMLActions(_:))
+        )
+        moreButton.isEnabled = !componentManager.isInstalling
+
+        let stack = NSStackView(views: [installButton, moreButton])
         stack.orientation = .horizontal
         stack.alignment = .centerY
         stack.spacing = 6
@@ -880,6 +939,91 @@ final class MojiPreferencesWindowController: NSWindowController, NSTableViewData
         NSWorkspace.shared.open(MojiPluginManager.shared.pluginDirectory)
     }
 
+    /// 从设置页主动下载安装当前架构组件；完成后刷新所有已打开文档，使 UML 图表立即从源码变为预览。
+    @objc private func downloadPlantUMLComponent(_ sender: Any?) {
+        MojiPlantUMLComponentManager.shared.installLatest { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success:
+                self.refreshOpenDocuments()
+            case .failure(let error):
+                NSAlert(error: error).runModal()
+            }
+        }
+    }
+
+    /// 展示 PlantUML 的低频管理操作，保留手动 ZIP 导入以支持离线或受限网络环境。
+    @objc private func showPlantUMLActions(_ sender: NSButton) {
+        let menu = NSMenu(title: "PlantUML")
+        let importItem = NSMenuItem(title: "从 ZIP 安装…", action: #selector(importPlantUMLComponent(_:)), keyEquivalent: "")
+        importItem.target = self
+        menu.addItem(importItem)
+
+        let openItem = NSMenuItem(title: "打开组件目录", action: #selector(openPlantUMLComponentDirectory(_:)), keyEquivalent: "")
+        openItem.target = self
+        menu.addItem(openItem)
+
+        if MojiPlantUMLComponentManager.shared.installedComponent() != nil {
+            menu.addItem(.separator())
+            let removeItem = NSMenuItem(title: "移除本地组件", action: #selector(removePlantUMLComponent(_:)), keyEquivalent: "")
+            removeItem.target = self
+            menu.addItem(removeItem)
+        }
+        menu.popUp(positioning: nil, at: NSPoint(x: 0, y: sender.bounds.maxY), in: sender)
+    }
+
+    /// 导入用户已下载的 Release ZIP；组件管理器会验证 JAR 与当前架构 Java 运行时后再替换旧版本。
+    @objc private func importPlantUMLComponent(_ sender: Any?) {
+        let panel = NSOpenPanel()
+        panel.title = "安装 PlantUML 组件"
+        panel.message = "选择从墨记 Release 下载的 InkMark-PlantUML ZIP 文件。"
+        panel.prompt = "安装"
+        panel.allowedFileTypes = ["zip"]
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.allowsMultipleSelection = false
+        guard panel.runModal() == .OK, let archiveURL = panel.url else { return }
+
+        MojiPlantUMLComponentManager.shared.install(fromArchive: archiveURL) { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success:
+                self.refreshOpenDocuments()
+            case .failure(let error):
+                NSAlert(error: error).runModal()
+            }
+        }
+    }
+
+    /// 打开组件所在父目录，用户可以查看离线组件占用并手动备份 ZIP。
+    @objc private func openPlantUMLComponentDirectory(_ sender: Any?) {
+        let manager = MojiPlantUMLComponentManager.shared
+        do {
+            try FileManager.default.createDirectory(at: manager.componentContainerDirectory, withIntermediateDirectories: true)
+            NSWorkspace.shared.open(manager.componentContainerDirectory)
+        } catch {
+            NSAlert(error: error).runModal()
+        }
+    }
+
+    /// 移除前明确告知影响范围；仅 PlantUML 预览受影响，原始 Markdown 文档和其他图表能力不会改变。
+    @objc private func removePlantUMLComponent(_ sender: Any?) {
+        let alert = NSAlert()
+        alert.messageText = "移除 PlantUML 本地组件？"
+        alert.informativeText = "移除后 PlantUML 图表会显示安装提示，Mermaid、公式和 Markdown 预览不受影响。"
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "移除")
+        alert.addButton(withTitle: "取消")
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+
+        do {
+            try MojiPlantUMLComponentManager.shared.removeInstalledComponent()
+            refreshOpenDocuments()
+        } catch {
+            NSAlert(error: error).runModal()
+        }
+    }
+
     /// 添加用户插件文件，并在完成后刷新插件列表和所有预览。
     @objc private func addPluginFiles(_ sender: Any?) {
         let panel = NSOpenPanel()
@@ -928,6 +1072,12 @@ final class MojiPreferencesWindowController: NSWindowController, NSTableViewData
         reloadFromPreferences()
         selectSection(.plugins)
         refreshOpenDocuments()
+    }
+
+    /// 下载开始、完成或移除组件时只重建当前插件页，保留用户正在查看的设置分类与滚动规则。
+    private func handlePlantUMLComponentChange() {
+        guard selectedSection == .plugins else { return }
+        selectSection(.plugins)
     }
 
     @objc private func showMarkdownCheatsheet(_ sender: Any?) {

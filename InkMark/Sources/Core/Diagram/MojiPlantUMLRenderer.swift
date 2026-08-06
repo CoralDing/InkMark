@@ -1,5 +1,5 @@
 /**
- * 文件说明：墨记 PlantUML 本地渲染器，使用随应用分发的 Java 运行时生成 SVG。
+ * 文件说明：墨记 PlantUML 本地渲染器，使用按需安装的 Java 运行时生成 SVG。
  * 作者：dingyi60(Codex)
  * 创建时间：2026-08-05
  */
@@ -27,7 +27,7 @@ final class MojiPlantUMLRenderer {
             case .sourceTooLarge:
                 return "图表源码超过 1 MB 安全限制。"
             case .missingRuntime:
-                return "应用内置的 PlantUML 或 Java 运行时缺失。"
+                return "PlantUML 本地组件尚未安装。"
             case .launchFailed(let message):
                 return "无法启动本地渲染器：\(message)"
             case .renderingFailed(let message):
@@ -95,15 +95,14 @@ final class MojiPlantUMLRenderer {
         return lines.joined(separator: "\n")
     }
 
-    /// 启动随应用分发的 Java 进程，通过标准输入传入源码，并从临时文件读取 SVG。
+    /// 启动用户按需安装的 Java 进程，通过标准输入传入源码，并从临时文件读取 SVG。
     /// 输出使用文件而不是双向管道，避免大型图表填满缓冲区后让父子进程互相等待。
     private func renderSynchronously(sourceData: Data) -> Result<String, Error> {
-        guard let javaURL = bundledJavaURL(),
-              let jarURL = bundledPlantUMLURL(),
-              FileManager.default.isExecutableFile(atPath: javaURL.path),
-              FileManager.default.fileExists(atPath: jarURL.path) else {
+        guard let componentURLs = MojiPlantUMLComponentManager.shared.componentURLs() else {
             return .failure(RendererError.missingRuntime)
         }
+        let javaURL = componentURLs.javaURL
+        let jarURL = componentURLs.jarURL
 
         let temporaryDirectory = FileManager.default.temporaryDirectory
             .appendingPathComponent("moji-plantuml-\(UUID().uuidString)", isDirectory: true)
@@ -169,26 +168,4 @@ final class MojiPlantUMLRenderer {
         }
     }
 
-    /// 根据当前应用进程架构选择匹配的 Java 运行时，保证通用应用在 Apple 芯片和 Intel 上均可执行。
-    private func bundledJavaURL() -> URL? {
-        #if arch(arm64)
-        let runtimeDirectory = "runtime-arm64"
-        #elseif arch(x86_64)
-        let runtimeDirectory = "runtime-x86_64"
-        #else
-        return nil
-        #endif
-
-        return Bundle.main.resourceURL?
-            .appendingPathComponent("PlantUML", isDirectory: true)
-            .appendingPathComponent(runtimeDirectory, isDirectory: true)
-            .appendingPathComponent("Contents/Home/bin/java")
-    }
-
-    /// 返回随应用分发的 PlantUML JAR（Java 归档程序）位置。
-    private func bundledPlantUMLURL() -> URL? {
-        return Bundle.main.resourceURL?
-            .appendingPathComponent("PlantUML", isDirectory: true)
-            .appendingPathComponent("plantuml.jar")
-    }
 }

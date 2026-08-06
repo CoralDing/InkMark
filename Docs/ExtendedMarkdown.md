@@ -112,7 +112,7 @@ description: ZERO 原型或设计稿
 
 ## 图表
 
-Mermaid 与 PlantUML 都在本地渲染，不受可选插件总开关影响，也不会上传图表源码。
+Mermaid 始终在本地渲染；PlantUML 在首次按需安装组件后也在本地渲染。两者都不受可选插件总开关影响，也不会上传图表源码。
 
 ````markdown
 ```mermaid
